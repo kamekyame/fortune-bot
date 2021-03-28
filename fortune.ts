@@ -17,8 +17,8 @@ export class Fortune {
 
   private receiveUsername = "SuzuTomo2001";
 
-  private readonly tag = "fortuneBOT";
-  private readonly value =
+  private readonly tag = "replyBOT";
+  private readonly value = () =>
     `to:${this.receiveUsername} -from:${this.receiveUsername}`;
 
   constructor(auth: OAuth1Info, bearerToken: string) {
@@ -32,9 +32,9 @@ export class Fortune {
 
   public async checkRule() {
     const rules = await getRules(this.bearerToken);
-    if (!rules.data?.some((d) => d.tag === this.tag)) {
+    if (!rules.data?.some((d) => d.value === this.value())) {
       const aRules = await changeRules(this.bearerToken, {
-        add: [{ value: this.value, tag: this.tag }],
+        add: [{ value: this.value(), tag: this.tag }],
       });
     }
   }
