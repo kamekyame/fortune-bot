@@ -1,8 +1,7 @@
 import { OAuth1Info } from "https://kamekyame.github.io/deno_tools/http/mod.ts";
 
 import {
-  changeRules,
-  getRules,
+  StreamParam,
   StreamTweet,
 } from "https://kamekyame.github.io/twitter_api_client/api_v2/tweets/filtered_stream.ts";
 import {
@@ -13,30 +12,32 @@ import { TweetLogFileOp } from "./file.ts";
 
 export class Fortune {
   private readonly auth: OAuth1Info;
-  private readonly bearerToken: string;
+  //private readonly bearerToken: string;
 
   private receiveUsername = "SuzuTomo2001";
 
-  private readonly tag = "replyBOT";
-  private readonly value = () =>
-    `to:${this.receiveUsername} -from:${this.receiveUsername}`;
+  private readonly tag = "fortuneBOT";
+  private readonly value = () => `@${this.receiveUsername} 占い`; // -from:${this.receiveUsername}`;
 
-  constructor(auth: OAuth1Info, bearerToken: string) {
+  public readonly option: StreamParam = {
+    expansions: {
+      author_id: true,
+    },
+    "user.fields": {
+      username: true,
+    },
+  };
+
+  constructor(auth: OAuth1Info) {
     this.auth = auth;
-    this.bearerToken = bearerToken;
   }
 
   public setReceiveUsername(username: string) {
     this.receiveUsername = username;
   }
 
-  public async checkRule() {
-    const rules = await getRules(this.bearerToken);
-    if (!rules.data?.some((d) => d.value === this.value())) {
-      const aRules = await changeRules(this.bearerToken, {
-        add: [{ value: this.value(), tag: this.tag }],
-      });
-    }
+  public getRule() {
+    return { tag: this.tag, value: this.value() };
   }
 
   async callback(res: StreamTweet) {
